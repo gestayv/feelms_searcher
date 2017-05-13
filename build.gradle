@@ -1,0 +1,39 @@
+version '0.1'
+
+apply plugin: 'java'
+apply plugin: 'application'
+mainClassName = 'searcher.FeelmsSearcherMain'
+sourceCompatibility = 1.8
+
+
+//Para compilar el jar a utilizar
+task fatJar(type: Jar) {
+
+    manifest {
+        attributes('Main-Class': 'searcher.FeelmsSearcherMain')
+    }
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task buildProject(dependsOn: ['fatJar'])
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.apache.lucene', name: 'lucene-core', version: '6.5.1'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
+    compile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.4.2'
+
+}
+
+//Jar simple, sin incluir dependencias
+jar {
+    manifest {
+        attributes('Main-Class': 'searcher.FeelmsSearcherMain')
+    }
+}
