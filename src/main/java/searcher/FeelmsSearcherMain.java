@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -35,7 +34,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MultiPhraseQuery;
-import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
 /**
  *
@@ -62,7 +60,7 @@ public class FeelmsSearcherMain
     //  - indexDir: ruta del índice
     //  - queryStr: string que se busca en el indice.
     //  - maxHits: número máximo de resultados que se devuelven.
-    private void searchIndex(Path indexDir, String queryStr, int maxHits) throws IOException
+    private List<String> searchIndex(Path indexDir, String queryStr, int maxHits) throws IOException
     {
         queryStr = queryStr.toLowerCase();
         Directory directory = FSDirectory.open(indexDir);
@@ -96,11 +94,8 @@ public class FeelmsSearcherMain
         }
         
         BooleanQuery queryNombres = qBuilder.build();
-        
         TopDocs topDocs = searcher.search(queryNombres, maxHits);
-        
         ScoreDoc[] hits = topDocs.scoreDocs;
-        
         
         //Ciclo para recorrer documentos entregados y guardarlos en una lista de strings
         for (int i = 0; i < hits.length; i++) {
@@ -109,6 +104,7 @@ public class FeelmsSearcherMain
             peliculas.add(d.get("title"));
         }
         
+        return peliculas;
     }
     
     //  index: construye el índice con las películas en la bd sql
