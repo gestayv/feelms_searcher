@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -45,7 +46,7 @@ public class FeelmsSearcherMain
     //  Ruta en la que se almacena el índice
     private static final String index = "./src/main/resources/index";
     //  String query, esto es input del usuario.
-    private static final String query = "wars star";
+    private static final String query = "thor";
     
     
     public static void main(String[] args) throws IOException, SQLException
@@ -53,29 +54,24 @@ public class FeelmsSearcherMain
         Path indexDir = Paths.get(index);
         FeelmsSearcherMain fsm = new FeelmsSearcherMain();
         int num = fsm.index(indexDir);
-        System.out.println(num);
         fsm.searchIndex(indexDir, query, 10);
     }
     
-    //  searchIndex, se encarga de buscar un string en el índice
+    //  searchIndex, se encarga de buscar un string en el índice de películas
+    //  y entregar los nombres de las películas en los que se encuentra el string.
     //  - indexDir: ruta del índice
     //  - queryStr: string que se busca en el indice.
     //  - maxHits: número máximo de resultados que se devuelven.
     private void searchIndex(Path indexDir, String queryStr, int maxHits) throws IOException
     {
         queryStr = queryStr.toLowerCase();
-        
         Directory directory = FSDirectory.open(indexDir);
-		
         IndexReader indexReader  = DirectoryReader.open(directory);
-
         IndexSearcher searcher = new IndexSearcher(indexReader);
-
         Analyzer analyzer = new StandardAnalyzer();
-        
         BooleanQuery.Builder qBuilder =  new BooleanQuery.Builder();
-        
         String[] input = queryStr.split(" ");
+        List<String> peliculas = new ArrayList<String>();
         
         if(input.length == 1)
         {
@@ -104,12 +100,15 @@ public class FeelmsSearcherMain
         TopDocs topDocs = searcher.search(queryNombres, maxHits);
         
         ScoreDoc[] hits = topDocs.scoreDocs;
-          
-         for (int i = 0; i < hits.length; i++) {
+        
+        
+        //Ciclo para recorrer documentos entregados y guardarlos en una lista de strings
+        for (int i = 0; i < hits.length; i++) {
             int docId = hits[i].doc;
             Document d = searcher.doc(docId);
-            System.out.println(d.get("original_title") + " o "+ d.get("title") +" Score :"+hits[i].score);
+            peliculas.add(d.get("title"));
         }
+        
     }
     
     //  index: construye el índice con las películas en la bd sql
